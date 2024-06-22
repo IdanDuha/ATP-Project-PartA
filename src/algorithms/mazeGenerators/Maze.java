@@ -1,18 +1,23 @@
 package algorithms.mazeGenerators;
-
+import java.util.Random;
 public class Maze {
     private int row;
     private int col;
     private Position StartPosition; //added Position class
     private Position GoalPosition;
     private int[][] map;  //changed "maze" to map due to same name in tests for creating a maze "Maze maze"
-    public Maze(int rows, int colm, Position start, Position end){
+
+    public Maze(int rows, int colm, Position start, Position end) {
         row = rows;
         col = colm;
         StartPosition = start;
         GoalPosition = end;
         map = new int[rows][colm];
 
+    }
+
+    public int getValue(int row, int col) {
+        return map[row][col];
     }
 
     public int getRow() {
@@ -27,24 +32,37 @@ public class Maze {
         return map;
     }
 
-    public void SetStartingPoint(Position start){
-        StartPosition=start;
+    public void setStartingPoint(Position start) {
+        StartPosition = start;
     }
-    public void SetGoalPoint (Position goal){
-        GoalPosition=goal;
+
+    public void setGoalPoint(Position goal) {
+        GoalPosition = goal;
     }
-    public Position GetStartingPoint(){
+
+    public boolean isValidCell(int row, int col) {
+        if (row >= 0 && row < map.length && col >= 0 && col < map[0].length)
+            return true;
+        return false;
+    }
+
+    public Position getStartingPoint() {
         return StartPosition;
     }
-    public Position getGoalPosition(){
+
+    public Position getGoalPosition() {
         return GoalPosition;
     }
 
-    public void setToZero(int row,int col){
+    public void setToZero(int row, int col) {
         map[row][col] = 0;
     }
 
-    protected void SetPoint(int rowIndex, int colIndex, int number){
+    public void setToTwo(int row, int col) {
+        map[row][col] = 2;
+    }
+
+    protected void setPoint(int rowIndex, int colIndex, int number) {
         this.map[rowIndex][colIndex] = number;
     }
 }

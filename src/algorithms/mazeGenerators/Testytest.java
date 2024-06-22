@@ -2,8 +2,8 @@ package algorithms.mazeGenerators;
 
 public class Testytest {
     public static void main(String[] args) {
-        SimpleMazeGenerator generator = new SimpleMazeGenerator();
-        Maze maze = generator.generate(1, 10); // Generates a 10x10 maze
+        MyMazeGenerator generator = new MyMazeGenerator();
+        Maze maze = generator.generate(5, 3); // Generates a 10x10 maze
 
         if (maze == null) {
             System.out.println("niguhhaaaaaaaa");
@@ -11,9 +11,9 @@ public class Testytest {
             // Display the generated maze
             for (int i = 0; i < maze.getRow(); i++) {
                 for (int j = 0; j < maze.getCol(); j++) {
-                    if (i == maze.GetStartingPoint().getRowIndex() && j == maze.GetStartingPoint().getColIndex()) {
+                    if (i == maze.getStartingPoint().getRowIndex() && j == maze.getStartingPoint().getColIndex()) {
                         System.out.print("S "); // Print start point as 'S'
-                    } else if (i == maze.getGoalPosition().getColIndex() && j == maze.getGoalPosition().getColIndex()) {
+                    } else if (i == maze.getGoalPosition().getRowIndex() && j == maze.getGoalPosition().getColIndex()) {
                         System.out.print("G "); // Print goal point as 'G'
                     } else if (maze.getMaze()[i][j] == 1) {
                         System.out.print("1 "); // Print walls as '#'
@@ -23,6 +23,8 @@ public class Testytest {
                 }
                 System.out.println();
             }
+            System.out.print(maze.getGoalPosition().toString());
+            System.out.print(maze.getStartingPoint().toString());
         }
     }
 }
