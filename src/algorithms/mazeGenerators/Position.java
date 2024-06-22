@@ -9,16 +9,25 @@ public class Position {
         this.col = col;
     }
 
-    public int getRowIndex(){
+    public int getRowIndex() {
         return row;
     }
 
-    public int getColIndex(){
+    public int getColIndex() {
         return col;
     }
 
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Position other = (Position) obj;
+
+        return this.row == other.row && this.col == other.col;
+    }
+
+
     @Override
     public String toString() {
-        return "{" + row +"," +col +"}";
+        return "{" + row + "," + col + "}";
     }
 }
