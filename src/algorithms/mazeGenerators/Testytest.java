@@ -11,7 +11,7 @@ public class Testytest {
             // Display the generated maze
             for (int i = 0; i < maze.getRow(); i++) {
                 for (int j = 0; j < maze.getCol(); j++) {
-                    if (i == maze.getStartingPoint().getRowIndex() && j == maze.getStartingPoint().getColIndex()) {
+                    if (i == maze.getStartPosition().getRowIndex() && j == maze.getStartPosition().getColIndex()) {
                         System.out.print("S "); // Print start point as 'S'
                     } else if (i == maze.getGoalPosition().getRowIndex() && j == maze.getGoalPosition().getColIndex()) {
                         System.out.print("G "); // Print goal point as 'G'
@@ -24,7 +24,7 @@ public class Testytest {
                 System.out.println();
             }
             System.out.print(maze.getGoalPosition().toString());
-            System.out.print(maze.getStartingPoint().toString());
+            System.out.print(maze.getStartPosition().toString());
         }
     }
 }

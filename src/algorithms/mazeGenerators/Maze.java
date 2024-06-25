@@ -46,7 +46,7 @@ public class Maze {
         return false;
     }
 
-    public Position getStartingPoint() {
+    public Position getStartPosition() {
         return StartPosition;
     }
 
