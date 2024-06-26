@@ -1,24 +1,18 @@
 package algorithms.search;
 
-import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Stack;
+import java.util.Collection;
 
-public class Solution implements Serializable {
+public class Solution {
+    protected ArrayList<AState> states;
+    protected ArrayList<AState> reversed;
 
-    private ArrayList<AState> states;
-
-    public Solution(Stack<AState> path) {
+    public Solution() {
         this.states = new ArrayList<>();
-        this.setStates(path);
-    }
-
-    public void setStates(Stack<AState> arrayList) {
-        while (!arrayList.isEmpty())
-            this.states.add(arrayList.pop());
+        this.reversed = new ArrayList<>();
     }
 
     public ArrayList<AState> getSolutionPath() {
-        return states;
+        return this.reversed;
     }
 }

@@ -3,6 +3,7 @@ package algorithms.mazeGenerators;
 public class Position {
     private int row;
     private int col;
+    private boolean check;
 
     public Position(int row, int col){
         this.row = row;
@@ -29,5 +30,9 @@ public class Position {
     @Override
     public String toString() {
         return "{" + row + "," + col + "}";
+    }
+
+    public void isChecked(boolean visited) {
+        check = visited;
     }
 }

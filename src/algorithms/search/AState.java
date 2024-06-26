@@ -2,13 +2,11 @@ package algorithms.search;
 
 public abstract class AState {
     private String state;
-    private double cost;
+    private int cost;
     private AState cameFrom;
-    public boolean isVisited;
+    public boolean isvisited;
     private int distance;
-
-    public AState(double cost, String preState) {
-    }
+    public boolean crossTome;
 
     public void setState(String state) {
         this.state = state;
@@ -19,11 +17,11 @@ public abstract class AState {
     }
 
 
-    public void setCost(double cost) {
+    public void setCost(int cost) {
         this.cost = cost;
     }
 
-    public double getCost() {
+    public int getCost() {
         return this.cost;
     }
 
@@ -31,8 +29,8 @@ public abstract class AState {
         this.cameFrom = cameFrom;
     }
 
-    public void setIsVisited() {
-        this.isVisited = true;
+    public void setIsvisited() {
+        this.isvisited = true;
     }
 
     ;
@@ -46,12 +44,13 @@ public abstract class AState {
     }
 
     public boolean isVisited() {
-        return this.isVisited;
+        return this.isvisited;
     }
 
-    //    public abstract void updateVisited();
-    public void setDistance(int distance) {
-        this.distance = distance;
+    public abstract void updateVisited();
+
+    public void setDistance(int distance1) {
+        this.distance = distance1;
     }
 
     ;

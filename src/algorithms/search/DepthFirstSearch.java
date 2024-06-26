@@ -1,106 +1,66 @@
 package algorithms.search;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Stack;
 
 public class DepthFirstSearch extends ASearchingAlgorithm {
 
-    Stack<AState> stack;
-    Set<AState> visited;
-    Map<AState, AState> predecessors;
-    int nodesVisit;
+    private LinkedList<AState> linked;
+    private HashMap<String, Boolean> marked;
 
     public DepthFirstSearch() {
         this.name = "DepthFirstSearch";
-        this.stack = new Stack<>();
-        this.visited = new HashSet<>();
-        this.predecessors = new HashMap<>();
-        this.nodesVisit = 0;
+        this.linked = new LinkedList<>();
+        this.marked = new HashMap<>();
     }
 
     @Override
-    public Solution solve(ISearchable iSearchable) {
-        if (iSearchable == null)
-            return null;
+    public AState search(ISearchable s) {
+        AState start = s.getStartState();
+        AState goal = s.getGoalState();
+        linked.push(start);
+        start.setIsvisited();
+        start.updateVisited();
+        marked.put(start.getState(), true);
+        this.visitedNodes++;
+        while (!linked.isEmpty() && !goal.isVisited()) {
+            AState n = linked.pop();
+            ArrayList<AState> nei = s.getAllPossibleStates(n);
+            int i = 0;
+            while (!nei.isEmpty()) {
+                AState curr = nei.get(i);
+                if (!marked.containsKey(curr.getState())) {
+                    marked.put(curr.getState(), true);
+                    curr.setIsvisited();
+                    curr.setCameFrom(n);
+                    linked.push(curr);
+                    curr.updateVisited();
+                    visitedNodes++;
 
-        stack.clear();
-        visited.clear();
-        predecessors.clear();
-        nodesVisit = 0;
-
-        AState start = iSearchable.getStartState();
-        AState goal = iSearchable.getGoalState();
-        if (start.equals(goal))
-            return new Solution(buildSolutionPath(start));
-
-        executeSearch(iSearchable, start, goal);
-
-        return new Solution(null);
-    }
-
-    @Override
-    public AState search(ISearchable iSearchable) {
-        if (iSearchable == null)
-            return null;
-
-        stack.clear();
-        visited.clear();
-        predecessors.clear();
-        nodesVisit = 0;
-
-        AState start = iSearchable.getStartState();
-        AState goal = iSearchable.getGoalState();
-        if (start.equals(goal))
-            return goal;
-
-        executeSearch(iSearchable, start, goal);
-
-        return goal;
-    }
-
-    protected void executeSearch(ISearchable iSearchable, AState startNode, AState goalNode) {
-        stack.push(startNode);
-        visited.add(startNode);
-
-        while (!stack.isEmpty()) {
-            nodesVisit++;
-            AState current = stack.pop();
-            if (current.equals(goalNode)) {
-                return;
-            }
-            ArrayList<AState> successors;
-            try {
-                successors = iSearchable.getAllSuccessors(current);
-            } catch (Exception e) {
-                e.printStackTrace();
-                return;
-            }
-            for (AState successor : successors) {
-                if (!visited.contains(successor)) {
-                    predecessors.put(successor, current);
-                    stack.push(successor);
-                    visited.add(successor);
                 }
-            }
-        }
-    }
+                if (curr.getState().compareTo(goal.getState()) == 0) {
+                    return curr;
 
-    @Override
-    public String getName() {
-        return name;
+                }
+                nei.remove(curr);
+            }
+
+        }
+        return null;
+
     }
 
     @Override
     public int getNumberOfNodesEvaluated() {
-        return nodesVisit;
+        return this.visitedNodes;
     }
 
-    private Stack<AState> buildSolutionPath(AState goal) {
-        Stack<AState> path = new Stack<>();
-        AState current = goal;
-        while (current != null) {
-            path.push(current);
-            current = predecessors.get(current);
-        }
-        return path;
+    @Override
+    public String getName() {
+        return this.name;
     }
+
+
 }

@@ -3,84 +3,66 @@ package algorithms.search;
 import java.util.*;
 
 public class BreadthFirstSearch extends ASearchingAlgorithm {
-
-    Collection<AState> que;
-    Set<AState> visited = new HashSet<>();
-    Map<AState, AState> predecessors = new HashMap<>();
-    int nodesVisit = 0;
+    private HashMap<String, Boolean> marked;
+    private Queue<AState> queue;
 
     public BreadthFirstSearch() {
-        super();
-        name = "BFS";
-        this.que = new LinkedHashSet<>();
+        this.queue = new LinkedList<>();
+        this.marked = new HashMap<>();
+        this.name = "BreadthFirstSearch";
     }
 
-    @Override
-    public int getNumberOfNodesEvaluated() {
-        return nodesVisit;
-    }
+    /// Generic BFS
+    public AState search(ISearchable s) {
+        AState start = s.getStartState();//the start state
+        AState goal = s.getGoalState();//the end state
 
-    @Override
-    public Solution solve(ISearchable s) {
-        if (s == null)
-            return null;
+        queue.add(start); // add start state to queue
+        start.setIsvisited();
+        start.updateVisited();
+        marked.put(start.getState(), true); // mark start state as visited
+        visitedNodes++;
 
-        // Clear data in case this instance solves more than one ISearchable object
-        que.clear();
-        visited.clear();
-        predecessors.clear();
-        nodesVisit = 0;
+        while (!queue.isEmpty() && !goal.isVisited()) {
+            AState visitedState = queue.remove(); // remove state with highest priority (i.e., smallest cost)
+            ArrayList<AState> neighbors = s.getAllPossibleStates(visitedState); // get all neighboring states
+            updateCost(visitedState, neighbors); // update cost of neighboring states
 
-        AState goal = s.getGoalState();
-        AState current = s.getStartState();
-        if (current.equals(goal))
-            return new Solution(buildSolutionPath(current));
-
-        que.add(current);
-        visited.add(current);
-
-        while (!que.isEmpty()) {
-            nodesVisit++;
-            current = getFirstInQue();
-            ArrayList<AState> successors = s.getAllSuccessors(current);
-            for (AState successor : successors) {
-                if (!visited.contains(successor)) {
-                    predecessors.put(successor, current);
-                    if (successor.equals(goal)) {
-                        return new Solution(buildSolutionPath(successor));
-                    }
-                    que.add(successor);
-                    visited.add(successor);
+            for (AState curr : neighbors) {
+                if (!marked.containsKey(curr.getState())) { // if state has not been visited before
+                    marked.put(curr.getState(), true); // mark state as visited
+                    curr.setCameFrom(visitedState);
+                    queue.add(curr); // add state to queue
+                    curr.setIsvisited();
+                    visitedNodes++;
+                    curr.updateVisited();
                 }
+
+                if (curr.getState().compareTo(goal.getState()) == 0) // if goal state is found return state
+                    return curr;//
             }
         }
-        return new Solution(null);
-    }
 
-    @Override
-    public AState search(ISearchable search) {
+        // goal  not found
         return null;
     }
 
-    @Override
+    // helper method to update cost of neighboring states
+    private void updateCost(AState curr, ArrayList<AState> neighbors) {
+        for (AState neighbor : neighbors) {
+            if (!neighbor.isVisited() || curr.getCost() + 1 < neighbor.getCost()) {
+                neighbor.setCost(curr.getCost() + 1);
+            }
+        }
+    }
+
+    public int getNumberOfNodesEvaluated() {
+        return visitedNodes;
+    }
+
     public String getName() {
         return name;
     }
 
 
-    private AState getFirstInQue() {
-        AState first = que.iterator().next();
-        que.remove(first);
-        return first;
-    }
-
-    private Stack<AState> buildSolutionPath(AState goal) {
-        Stack<AState> path = new Stack<>();
-        AState current = goal;
-        while (current != null) {
-            path.push(current);
-            current = predecessors.get(current);
-        }
-        return path;
-    }
 }

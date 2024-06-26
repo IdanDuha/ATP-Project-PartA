@@ -1,48 +1,41 @@
+
 package algorithms.search;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Stack;
+import java.util.PriorityQueue;
 
 public abstract class ASearchingAlgorithm implements ISearchingAlgorithm {
-    protected int nodeEvaluationCount;
+    protected PriorityQueue<AState> openList;
+    protected int visitedNodes;
     protected String name;
 
-    protected ASearchingAlgorithm() {
-        this.nodeEvaluationCount = 0;
+    public ASearchingAlgorithm() {
+        openList = new PriorityQueue<>();
+        visitedNodes = 0;
     }
 
-    public int getNodeEvaluationCount() {
-        return nodeEvaluationCount;
+    protected AState popOpenList() {
+        visitedNodes++;
+        return openList.poll();
     }
 
-    @Override
-    public Solution solve(ISearchable searchable) {
-        if (searchable == null) {
-            return null;
+    public Solution solve(ISearchable s) {
+        Solution sol = new Solution();
+        AState state = this.search(s);
+
+        sol.states.add(state);
+        if (state == null)
+            return sol;
+        if (state.getCameFrom() == null) {
+            return sol;
         }
-
-        AState startNode = searchable.getStartState();
-        AState goalNode = searchable.getGoalState();
-        Stack<AState> solutionNodes = new Stack<>();
-        this.nodeEvaluationCount = 0;
-
-        if (startNode.equals(goalNode)) {
-            solutionNodes.add(goalNode);
-            this.nodeEvaluationCount = 1;
-            return new Solution(solutionNodes);
+        AState curr = state.getCameFrom();
+        while (curr != null) {
+            sol.states.add(curr);
+            curr = curr.getCameFrom();
         }
-
-        //     executeSearch(startNode, goalNode);
-
-        AState currentNode = goalNode;
-        while (currentNode != null) {
-            solutionNodes.add(0, currentNode);
-            currentNode = currentNode.getCameFrom();
+        for (int i = sol.states.size() - 1; i >= 0; i--) {
+            sol.reversed.add(sol.states.get(i));
         }
-
-        return new Solution(solutionNodes);
+        return sol;
     }
-
-    // protected abstract void executeSearch(AState startNode, AState goalNode);
 }

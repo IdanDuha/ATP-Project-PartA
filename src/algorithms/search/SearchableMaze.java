@@ -4,77 +4,101 @@ import algorithms.mazeGenerators.Maze;
 import algorithms.mazeGenerators.Position;
 
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.Queue;
 
 public class SearchableMaze implements ISearchable {
-    Maze maze;
+    private Maze maze;
 
-    public SearchableMaze(Maze maze) {
+    public SearchableMaze(Maze m) {
+        this.maze = m;
+    }
+
+    public AState getStartState() {
+        return new MazeState(maze.getStartPosition());
+    }
+
+    public AState getGoalState() {
+        return new MazeState(maze.getGoalPosition());
+    }
+
+    public Maze getMaze() {
+        return maze;
+    }
+
+    public void setMaze(Maze maze) {
         this.maze = maze;
     }
 
-    //getter methods.
-    @Override
-    public AState getStartState() {
-        Position p = maze.getStartPosition();
-        return new MazeState(p, 0, p.toString());
+    public ArrayList<AState> getAllPossibleStates(AState s) {
+        ArrayList<AState> neighbors = new ArrayList<>();
+        int row = ((MazeState) s).p.getRowIndex();
+        int col = ((MazeState) s).p.getColIndex();
+        if (inBounds(row + 1, col, maze)) {
+            Position p1 = new Position(row + 1, col);
+            if (maze.getValue(row + 1, col) == 0) {
+                MazeState m = new MazeState(p1);
+                neighbors.add(m);
+            }
+        }
+        if (inBounds(row, col + 1, maze)) {
+            Position p2 = new Position(row, col + 1);
+            if (maze.getValue(row, col + 1) == 0) {
+                MazeState m = new MazeState(p2);
+                neighbors.add(m);
+            }
+        }
+        if (inBounds(row - 1, col, maze)) {
+            Position p3 = new Position(row - 1, col);
+            if (maze.getValue(row - 1, col) == 0) {
+                MazeState m = new MazeState(p3);
+                neighbors.add(m);
+            }
+        }
+        if (inBounds(row, col - 1, maze)) {
+            Position p4 = new Position(row, col - 1);
+            if (maze.getValue(row, col - 1) == 0) {
+                MazeState m = new MazeState(p4);
+                neighbors.add(m);
+            }
+        }
+        if (inBounds(row + 1, col - 1, maze)) {
+            Position p5 = new Position(row + 1, col - 1);
+            if (maze.getValue(row + 1, col - 1) == 0) {
+                MazeState m = new MazeState(p5);
+                m.crossTome = true;
+                neighbors.add(m);
+            }
+        }
+        if (inBounds(row + 1, col + 1, maze)) {
+            Position p6 = new Position(row + 1, col + 1);
+            if (maze.getValue(row + 1, col + 1) == 0) {
+                MazeState m = new MazeState(p6);
+                m.crossTome = true;
+                neighbors.add(m);
+            }
+        }
+        if (inBounds(row - 1, col + 1, maze)) {
+            Position p7 = new Position(row - 1, col + 1);
+            if (maze.getValue(row - 1, col + 1) == 0) {
+                MazeState m = new MazeState(p7);
+                m.crossTome = true;
+                neighbors.add(m);
+            }
+        }
+        if (inBounds(row - 1, col - 1, maze)) {
+            Position p8 = new Position(row - 1, col);
+            if (maze.getValue(row - 1, col - 1) == 0) {
+                MazeState m = new MazeState(p8);
+                m.crossTome = true;
+                neighbors.add(m);
+            }
+        }
+        return neighbors;
     }
 
-    @Override
-    public AState getGoalState() {
-        Position p = maze.getGoalPosition();
-        return new MazeState(p, 0, p.toString());
-    }
-
-    @Override
-    public ArrayList<AState> getAllPossibleStates(AState state) {
-        return null;
-    }
-
-
-    @Override
-    public ArrayList<AState> getAllSuccessors(AState as) {
-//        if (as==null) throw new Exception("Cannot find successors of null");
-        MazeState ms = (MazeState) as;
-        int i = ms.getPosition().getRowIndex(), j = ms.getPosition().getColIndex();
-        boolean up = false, down = false, left = false, right = false;
-        ArrayList<AState> to_ret = new ArrayList<>();
-        if (i != 0 && maze.getMaze()[i - 1][j] == 0) {//up
-            Position p = new Position(i - 1, j);
-            to_ret.add(new MazeState(p, 10, p.toString()));
-            up = true;
-        }
-        if (j != 0 && maze.getMaze()[i][j - 1] == 0) {//left
-            Position p = new Position(i, j - 1);
-            to_ret.add(new MazeState(new Position(i, j - 1), 10, p.toString()));
-            left = true;
-        }
-        if (i != maze.getRow() - 1 && maze.getMaze()[i + 1][j] == 0) {//down
-            Position p = new Position(i + 1, j);
-            to_ret.add(new MazeState(p, 10, p.toString()));
-            down = true;
-        }
-        if (j != maze.getCol() - 1 && maze.getMaze()[i][j + 1] == 0) {//right
-            Position p = new Position(i, j + 1);
-            to_ret.add(new MazeState(p, 10, p.toString()));
-            right = true;
-        }
-        if (i != 0 && j != 0 && maze.getMaze()[i - 1][j - 1] == 0 && (up || left)) {
-            Position p = new Position(i - 1, j - 1);
-            to_ret.add(new MazeState(p, 15, p.toString()));
-        }
-        if (i != 0 && j != maze.getCol() - 1 && maze.getMaze()[i - 1][j + 1] == 0 && (up || right)) {
-            Position p = new Position(i - 1, j + 1);
-            to_ret.add(new MazeState(p, 15, p.toString()));
-        }
-        if (i != maze.getRow() - 1 && j != 0 && maze.getMaze()[i + 1][j - 1] == 0 && (down || left)) {
-            Position p = new Position(i + 1, j - 1);
-            to_ret.add(new MazeState(p, 15, p.toString()));
-        }
-        if (i != maze.getRow() - 1 && j != maze.getCol() - 1 && maze.getMaze()[i + 1][j + 1] == 0 && (down || right)) {
-            Position p = new Position(i + 1, j + 1);
-            to_ret.add(new MazeState(p, 15, p.toString()));
-        }
-        return to_ret;
+    public static boolean inBounds(int row, int col, Maze m) {
+        return (0 <= row && row <= m.getGoalPosition().getRowIndex() && 0 <= col && col <= m.getGoalPosition().getColIndex());
     }
 
 
