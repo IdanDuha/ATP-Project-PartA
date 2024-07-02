@@ -1,68 +1,44 @@
 package algorithms.search;
 
-import java.util.*;
+import javax.naming.Name;
+import java.util.HashMap;
+import java.util.concurrent.LinkedTransferQueue;
 
 public class BreadthFirstSearch extends ASearchingAlgorithm {
-    private HashMap<String, Boolean> marked;
-    private Queue<AState> queue;
-
     public BreadthFirstSearch() {
-        this.queue = new LinkedList<>();
-        this.marked = new HashMap<>();
-        this.name = "BreadthFirstSearch";
+        visited = new LinkedTransferQueue<>();
+        states = new HashMap<>();
     }
 
-    /// Generic BFS
-    public AState search(ISearchable s) {
-        AState start = s.getStartState();//the start state
-        AState goal = s.getGoalState();//the end state
+    public AState BFS(ISearchable origin) {
+        visited.add(origin.getStartState());
+        states.put(origin.getStartState().toString(), origin.getStartState());
+        while (!visited.isEmpty()) {
 
-        queue.add(start); // add start state to queue
-        start.setIsvisited();
-        start.updateVisited();
-        marked.put(start.getState(), true); // mark start state as visited
-        visitedNodes++;
+            AState currState = visited.poll();
 
-        while (!queue.isEmpty() && !goal.isVisited()) {
-            AState visitedState = queue.remove(); // remove state with highest priority (i.e., smallest cost)
-            ArrayList<AState> neighbors = s.getAllPossibleStates(visitedState); // get all neighboring states
-            updateCost(visitedState, neighbors); // update cost of neighboring states
-
-            for (AState curr : neighbors) {
-                if (!marked.containsKey(curr.getState())) { // if state has not been visited before
-                    marked.put(curr.getState(), true); // mark state as visited
-                    curr.setCameFrom(visitedState);
-                    queue.add(curr); // add state to queue
-                    curr.setIsvisited();
-                    visitedNodes++;
-                    curr.updateVisited();
+            if (currState.equals(origin.getGoalState()))
+                return currState;
+            for (AState nearBy : origin.getAllPossibleStates(currState)) {
+                if (!states.containsKey(nearBy.toString())) {
+                    states.put(nearBy.toString(), nearBy);
+                    visited.add(nearBy);
                 }
-
-                if (curr.getState().compareTo(goal.getState()) == 0) // if goal state is found return state
-                    return curr;//
             }
         }
-
-        // goal  not found
         return null;
     }
 
-    // helper method to update cost of neighboring states
-    private void updateCost(AState curr, ArrayList<AState> neighbors) {
-        for (AState neighbor : neighbors) {
-            if (!neighbor.isVisited() || curr.getCost() + 1 < neighbor.getCost()) {
-                neighbor.setCost(curr.getCost() + 1);
-            }
-        }
+    @Override
+    public Solution solve(ISearchable origin) {
+        if (origin == null) return null;
+        AState goalState = BFS(origin);
+        this.solution = backTrackingToStartState(goalState);
+        return goalState != null ? backTrackingToStartState(goalState) : null;
     }
 
-    public int getNumberOfNodesEvaluated() {
-        return visitedNodes;
-    }
-
+    @Override
     public String getName() {
-        return name;
+        return "Breadth First Search";
     }
-
-
 }

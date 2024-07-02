@@ -97,5 +97,6 @@ public class SimpleMazeGenerator extends AMazeGenerator {
         }
 
         map[goal.getRowIndex()][goal.getColIndex()] = 0; // Set the goal cell to 0
+        map[start.getRowIndex()][start.getColIndex()] = 0; // Set the goal cell to 0
     }
 }

@@ -1,59 +1,51 @@
 package algorithms.search;
 
+import java.io.Serializable;
+
 public abstract class AState {
-    private String state;
     private int cost;
-    private AState cameFrom;
-    public boolean isvisited;
-    private int distance;
-    public boolean crossTome;
+    private AState lastmove;
+    private boolean isVisited;
 
-    public void setState(String state) {
-        this.state = state;
+    public AState(int cost, AState parent) {
+        this.cost = cost;
+        lastmove = parent;
     }
 
-    public String getState() {
-        return this.state;
+    public boolean isVisited() {
+        return isVisited;
     }
 
+    public void setVisited(boolean visited) {
+        isVisited = visited;
+    }
+
+    public void setLastMove(AState lastmove) {
+        this.lastmove = lastmove;
+    }
+
+    public AState getLastMove() {
+        return lastmove;
+    }
+
+    public int getCost() {
+        return cost;
+    }
 
     public void setCost(int cost) {
         this.cost = cost;
     }
 
-    public int getCost() {
-        return this.cost;
+    private int countVisited = 0;
+
+    public int getCountVisited() {
+        return countVisited;
     }
 
-    public void setCameFrom(AState cameFrom) {
-        this.cameFrom = cameFrom;
+    public void setCountVisited(int countVisited) {
+        this.countVisited = countVisited;
     }
 
-    public void setIsvisited() {
-        this.isvisited = true;
-    }
 
-    ;
-
-    public int getDistance() {
-        return this.distance;
-    }
-
-    public AState getCameFrom() {
-        return this.cameFrom;
-    }
-
-    public boolean isVisited() {
-        return this.isvisited;
-    }
-
-    public abstract void updateVisited();
-
-    public void setDistance(int distance1) {
-        this.distance = distance1;
-    }
-
-    ;
-
-
+    public abstract String toString();
 }

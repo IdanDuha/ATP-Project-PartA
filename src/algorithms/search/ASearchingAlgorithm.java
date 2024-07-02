@@ -1,41 +1,57 @@
-
 package algorithms.search;
 
-import java.util.PriorityQueue;
+import java.util.AbstractQueue;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public abstract class ASearchingAlgorithm implements ISearchingAlgorithm {
-    protected PriorityQueue<AState> openList;
-    protected int visitedNodes;
-    protected String name;
+    protected Solution solution;
+    protected HashMap<String, AState> states;
+    protected AbstractQueue<AState> visited;
 
-    public ASearchingAlgorithm() {
-        openList = new PriorityQueue<>();
-        visitedNodes = 0;
+    abstract public Solution solve(ISearchable origin);
+
+    @Override
+    public String getName() {
+        return getClass().getName();
     }
 
-    protected AState popOpenList() {
-        visitedNodes++;
-        return openList.poll();
+    @Override
+    public int getNumberOfNodesEvaluated() {   //returns the number of cells we passed
+        if (solution == null) {
+            return 0;
+        }
+        return solution.getSolutionPath().size();
     }
 
-    public Solution solve(ISearchable s) {
-        Solution sol = new Solution();
-        AState state = this.search(s);
+    public Solution backTrackingToStartState(AState goalState) {    //back track the solution path from the last Astate
 
-        sol.states.add(state);
-        if (state == null)
-            return sol;
-        if (state.getCameFrom() == null) {
-            return sol;
+        ArrayList<AState> solutionPath = new ArrayList<>();
+        solutionPath.add(goalState);
+        AState current = goalState;
+        while (current.getLastMove() != null) {
+            solutionPath.add(current.getLastMove());
+            current = current.getLastMove();
         }
-        AState curr = state.getCameFrom();
-        while (curr != null) {
-            sol.states.add(curr);
-            curr = curr.getCameFrom();
+        ArrayList<AState> finalsolutionPath = new ArrayList<>();
+
+        int i;
+        for (i = solutionPath.size() - 1; i >= 0; i--) {
+            finalsolutionPath.add(solutionPath.get(i));
         }
-        for (int i = sol.states.size() - 1; i >= 0; i--) {
-            sol.reversed.add(sol.states.get(i));
-        }
-        return sol;
+        return new Solution(finalsolutionPath);
     }
+
+    public long measureAlgorithmTimeMillisSearch(ISearchable is) {
+        long start = System.currentTimeMillis();
+        try {
+            this.solve(is);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        long end = System.currentTimeMillis();
+        return end - start;
+    }
+
+
 }

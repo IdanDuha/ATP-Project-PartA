@@ -1,92 +1,136 @@
 package algorithms.mazeGenerators;
-
-import java.util.Random;
-import java.util.Stack;
+import java.security.spec.ECField;
+import java.util.*;
+import java.util.List;
 
 public class MyMazeGenerator extends AMazeGenerator {
-    private static final int WALL = 1;
-    private static final int EMPTY = 0;
-    private static final int[][] DIRECTIONS = {
-            {0, 1}, {0, -1}, {1, 0}, {-1, 0}
-    };
-    private boolean[][] visited;
+    List<Position> validNeighbor = new ArrayList<Position>(); //the valid cells neighbor of spacific cell
+    Map<String, Integer> cellVisitedMap = new HashMap<String, Integer>(); // the visited cells map
 
     @Override
-    public Maze generate(int row, int col) {
+    public Maze generate(int rows, int columns) {
         try {
-            if (row < 2 || col < 2) {
+            if (rows < 2 || columns < 2) {
                 throw new IllegalArgumentException("Maze must have rows or columns larger that 1");
             }
-            // creating the start and goal point in the maze and making sure they are on the edges:
-            Position startPoint = setPointonEdge(row, col);
-            Position goalPoint;
 
+            Position StartPoint = setPointonEdge(rows, columns);
+            Position GoalPoint;
             do {
-                goalPoint = setPointonEdge(row, col);
-            } while (startPoint.equals(goalPoint));
-            // creating the maze:
-            Maze maze = new Maze(row, col, startPoint, goalPoint);
-            initializeMaze(maze); // Initializing the maze with only walls
+                GoalPoint = setPointonEdge(rows, columns);
 
-            generateMazeWithDFS(maze, startPoint); // generating a maze using DFS algorithm
+            } while (StartPoint.equals(GoalPoint));
 
-            return maze;
+
+            Maze m = new Maze(rows, columns, StartPoint, GoalPoint);
+            setAllWall(m);
+            Random r = new Random();
+
+            cellVisitedMap.replace(StartPoint.toString(), 1);
+            updateValidNeighbor(StartPoint, m);
+
+
+            while (!validNeighbor.isEmpty()) {
+                int index = r.nextInt(validNeighbor.size());
+                Position visitN = validNeighbor.remove(index);
+                cellVisitedMap.replace(visitN.toString(), 1);
+                if (countVisitedNeighbor(visitN, m) == 1) {
+                    boolean isFrame = visitN.getRowIndex() == 0 || visitN.getColIndex() == 0 || visitN.getRowIndex() == m.getRow() - 1 || visitN.getColIndex() == m.getCol() - 1;
+                    boolean notstart = visitN.getRowIndex() != m.getStartPosition().getRowIndex() || visitN.getColIndex() != m.getStartPosition().getColIndex();
+                    if (isFrame && notstart) {
+                        m.getMaze()[visitN.getRowIndex()][visitN.getColIndex()] = 0;
+                        updateValidNeighbor(visitN, m);
+                        m.setGoalPoint(visitN);
+                    } else {
+                        m.getMaze()[visitN.getRowIndex()][visitN.getColIndex()] = 0;
+                        updateValidNeighbor(visitN, m);
+                        validNeighbor.remove(visitN);
+                    }
+                }
+            }
+            if (m.getGoalPosition() == null)
+                checkNullGoalPos(m);
+            return m;
         } catch (IllegalArgumentException e) {
             System.err.println(e.getMessage());
             return null;
         }
     }
 
-    private void initializeMaze(Maze maze) {
-        int rows = maze.getRow();
-        int columns = maze.getCol();
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < columns; j++) {
-                maze.setPoint(i, j, WALL);
+
+    public void setAllWall(Maze m) {
+        for (int i = 0; i < m.getRow(); i++) {
+            for (int j = 0; j < m.getCol(); j++) {
+                Position p = new Position(i, j);
+                cellVisitedMap.put(p.toString(), 0);
+                m.getMaze()[i][j] = 1;
             }
         }
     }
 
-    private void generateMazeWithDFS(Maze maze, Position startPoint) {
-        visited = new boolean[maze.getRow()][maze.getCol()];
-        Stack<Position> stack = new Stack<>();
-        stack.push(startPoint);
-        visited[startPoint.getRowIndex()][startPoint.getColIndex()] = true;
-
-        while (!stack.isEmpty()) {
-            Position current = stack.pop();
-            Position neighbor = get_Random_Adjacent_Neighbor(current, maze);
-
-            if (neighbor != null) {
-                stack.push(current);
-                remove_Wall_Between_Cells(current, neighbor, maze);
-                visited[neighbor.getRowIndex()][neighbor.getColIndex()] = true;
-                stack.push(neighbor);
-            }
+    public void checkNullGoalPos(Maze m) {
+        if (m.getGoalPosition() == null) {
+            List<Position> neighbors = new ArrayList<Position>();
+            if (m.getStartPosition().getRowIndex() + 1 < m.getRow())
+                neighbors.add(new Position(m.getStartPosition().getRowIndex() + 1, m.getStartPosition().getColIndex()));
+            if (m.getStartPosition().getRowIndex() - 1 >= 0)
+                neighbors.add(new Position(m.getStartPosition().getRowIndex() - 1, m.getStartPosition().getColIndex()));
+            if (m.getStartPosition().getColIndex() + 1 < m.getCol())
+                neighbors.add(new Position(m.getStartPosition().getRowIndex(), m.getStartPosition().getColIndex() + 1));
+            if (m.getStartPosition().getColIndex() - 1 >= 0)
+                neighbors.add(new Position(m.getStartPosition().getRowIndex(), m.getStartPosition().getColIndex() - 1));
+            Collections.shuffle(neighbors);
+            Position Pos = neighbors.get(0);
+            m.getMaze()[Pos.getRowIndex()][Pos.getColIndex()] = 0;
+            m.setGoalPoint(Pos);
         }
     }
 
-    private void remove_Wall_Between_Cells(Position current, Position neighbor, Maze maze) {
-        maze.setPoint(current.getRowIndex(), current.getColIndex(), EMPTY);
-        maze.setPoint(neighbor.getRowIndex(), neighbor.getColIndex(), EMPTY);
-        int row = current.getRowIndex() + (neighbor.getRowIndex() - current.getRowIndex()) / 2;
-        int col = current.getColIndex() + (neighbor.getColIndex() - current.getColIndex()) / 2;
-        maze.setPoint(row, col, EMPTY);
-    }
+    public void updateValidNeighbor(Position p, Maze m) {
+        Position temp;
+        int x = p.getColIndex() - 1;
+        if (p.getColIndex() - 1 == -1)
+            x = 1;
+        for (int i = x; i <= p.getColIndex() + 2 && i >= 0 && i <= m.getCol() - 1; i += 2) {
+            temp = new Position(p.getRowIndex(), i);
+            if (cellVisitedMap.get(temp.toString()) == 0)
+                validNeighbor.add(temp);
 
-    private Position get_Random_Adjacent_Neighbor(Position current, Maze maze) {
-        Random rand = new Random();
-        int startDirection = rand.nextInt(4);
-
-        for (int i = 0; i < 4; i++) {
-            int directionIndex = (startDirection + i) % 4;
-            int newRow = current.getRowIndex() + DIRECTIONS[directionIndex][0] * 2;
-            int newCol = current.getColIndex() + DIRECTIONS[directionIndex][1] * 2;
-
-            if (maze.isValidCell(newRow, newCol) && !visited[newRow][newCol]) {
-                return new Position(newRow, newCol);
-            }
         }
-        return null;
+
+        //check cell rows neighbords and add the neighbords that not visited
+        x = p.getRowIndex() - 1;
+        if (p.getRowIndex() - 1 == -1)
+            x = 1;
+        for (int i = x; i < p.getRowIndex() + 2 && i >= 0 && i <= m.getRow() - 1; i += 2) {
+            temp = new Position(i, p.getColIndex());
+            if (cellVisitedMap.get(temp.toString()) == 0)
+                validNeighbor.add(temp);
+        }
     }
+
+    public int countVisitedNeighbor(Position p, Maze m) {
+        Position temp;
+        int c = 0;
+        int x = p.getColIndex() - 1;
+        if (p.getColIndex() - 1 == -1)
+            x = 1;
+        for (int i = x; i < p.getColIndex() + 2 && i >= 0 && i <= m.getCol() - 1; i += 2) {
+            temp = new Position(p.getRowIndex(), i);
+            if (cellVisitedMap.get(temp.toString()) == 1)
+                c++;
+        }
+        x = p.getRowIndex() - 1;
+        if (p.getRowIndex() - 1 == -1)
+            x = 1;
+        for (int i = x; i < p.getRowIndex() + 2 && i >= 0 && i <= m.getRow() - 1; i += 2) {
+            temp = new Position(i, p.getColIndex());
+            if (cellVisitedMap.get(temp.toString()) == 1)
+                c++;
+        }
+        return c;
+
+    }
+
+
 }

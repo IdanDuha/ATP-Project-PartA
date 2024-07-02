@@ -1,34 +1,41 @@
 package algorithms.search;
+import java.io.Serializable;
+
 import algorithms.mazeGenerators.Position;
 
-public class MazeState extends AState {
-    protected Position p;
+public class MazeState extends AState implements Serializable {
+    final Position currentpos;
 
-    MazeState(Position position) {
-        super();
-        this.p = position;
-        p.isChecked(this.isVisited());
-        this.setState("{" + position.getRowIndex() + "," + p.getColIndex() + "}");
-        crossTome = false;
-        setDistance(0);
+    public MazeState(Position currentpos, AState parent, int cost) {
+        super(cost, parent);
+        this.currentpos = currentpos;
+
+
     }
 
-    public void setVisited(boolean visited) {
-        this.isvisited = visited;
+
+    @Override
+    public String toString() {
+        return currentpos.toString();
     }
 
-    public boolean isVisited() {
-        return this.isvisited;
-    }
+    @Override
+    public boolean equals(Object obj) {
+        if (this.toString().equals(obj.toString())) return true;
 
-    public void updateVisited() {
-        if (this.isVisited()) {
-            p.isChecked(true);
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+
+        MazeState state1 = (MazeState) obj;
+        if (currentpos == null) {
+            return currentpos.equals(state1.currentpos);
+        } else {
+            return state1.currentpos == null;
         }
-    }
 
+    }
 
     public Position getPosition() {
-        return this.p;
+        return this.currentpos;
     }
 }

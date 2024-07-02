@@ -1,12 +1,10 @@
 package algorithms.search;
 
 public interface ISearchingAlgorithm {
-    public Solution solve(ISearchable s);
+    Solution solve(ISearchable domain);
 
-    public AState search(ISearchable s);
+    // returns the number of the nodes that visited in the path
+    int getNumberOfNodesEvaluated();
 
-    public int getNumberOfNodesEvaluated();
-
-    public String getName();
-
+    String getName();
 }

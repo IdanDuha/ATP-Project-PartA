@@ -3,103 +3,98 @@ package algorithms.search;
 import algorithms.mazeGenerators.Maze;
 import algorithms.mazeGenerators.Position;
 
+import java.io.Serializable;
+
 import java.util.ArrayList;
-import java.util.Map;
-import java.util.Queue;
 
-public class SearchableMaze implements ISearchable {
-    private Maze maze;
+public class SearchableMaze implements ISearchable, Serializable {
+    Maze maze;
 
-    public SearchableMaze(Maze m) {
-        this.maze = m;
+    public SearchableMaze(Maze maze) {
+        try {
+            if (maze == null) {
+                throw new IllegalArgumentException("Invalid Maze");
+            }
+            this.maze = maze;
+        } catch (IllegalArgumentException e) {
+            System.err.println(e.getMessage());
+        }
     }
 
-    public AState getStartState() {
-        return new MazeState(maze.getStartPosition());
+    public ArrayList<AState> getAllPossibleStates(AState a)     //returns all the states that are reachable
+    {
+        ArrayList<AState> statelist = new ArrayList<AState>();
+        MazeState m = (MazeState) a;
+        Position pos = m.getPosition();
+        int x = pos.getRowIndex();
+        int y = pos.getColIndex();
+        int cols = maze.getCol();
+        int rows = maze.getRow();
+        if (x > 0 && maze.getValue(x - 1, y) != 1) {
+            Position newPos = new Position(x - 1, y);
+            MazeState M = new MazeState(newPos, m, 10);
+            statelist.add(M);
+        }
+
+
+        if (x < rows - 1 && maze.getValue(x + 1, y) != 1) {
+            Position newPos = new Position(x + 1, y);
+            MazeState mState = new MazeState(newPos, m, 10);
+            statelist.add(mState);
+        }
+
+        if (y > 0 && maze.getValue(x, y - 1) != 1) {
+            Position newPos = new Position(x, y - 1);
+            MazeState mState = new MazeState(newPos, m, 10);
+            statelist.add(mState);
+        }
+
+        if (y < cols - 1 && maze.getValue(x, y + 1) != 1) {
+            Position newPos = new Position(x, y + 1);
+            MazeState mState = new MazeState(newPos, m, 10);
+            statelist.add(mState);
+        }
+
+        if (x > 0 && y > 0 && maze.getValue(x - 1, y - 1) != 1 && (maze.getValue(x, y - 1) != 1 || maze.getValue(x - 1, y) != 1)) {
+            Position newPos = new Position(x - 1, y - 1);
+            MazeState mState = new MazeState(newPos, m, 15);
+            statelist.add(mState);
+        }
+
+        if (x < rows - 1 && y < cols - 1 && maze.getValue(x + 1, y + 1) != 1 && (maze.getValue(x, y + 1) != 1 || maze.getValue(x + 1, y) != 1)) {
+            Position newPos = new Position(x + 1, y + 1);
+            MazeState mState = new MazeState(newPos, m, 15);
+            statelist.add(mState);
+        }
+
+        if (x < rows - 1 && y > 0 && maze.getValue(x + 1, y - 1) != 1 && (maze.getValue(x + 1, y) != 1 || maze.getValue(x, y - 1) != 1)) {
+            Position newPos = new Position(x + 1, y - 1);
+            MazeState mState = new MazeState(newPos, m, 15);
+            statelist.add(mState);
+        }
+
+        if (x > 0 && y < cols - 1 && maze.getValue(x - 1, y + 1) != 1 && (maze.getValue(x, y + 1) != 1 || maze.getValue(x - 1, y) != 1)) {
+            Position newPos = new Position(x - 1, y + 1);
+            MazeState mState = new MazeState(newPos, m, 15);
+            statelist.add(mState);
+        }
+
+
+        return statelist;
+
     }
 
-    public AState getGoalState() {
-        return new MazeState(maze.getGoalPosition());
+    @Override
+    public MazeState getStartState() {
+        return new MazeState(maze.getStartPosition(), null, 0);
     }
 
-    public Maze getMaze() {
+    @Override
+    public MazeState getGoalState() {
+        return new MazeState(maze.getGoalPosition(), null, 0);
+    }
+
+    public Maze returnMaze() {
         return maze;
     }
-
-    public void setMaze(Maze maze) {
-        this.maze = maze;
-    }
-
-    public ArrayList<AState> getAllPossibleStates(AState s) {
-        ArrayList<AState> neighbors = new ArrayList<>();
-        int row = ((MazeState) s).p.getRowIndex();
-        int col = ((MazeState) s).p.getColIndex();
-        if (inBounds(row + 1, col, maze)) {
-            Position p1 = new Position(row + 1, col);
-            if (maze.getValue(row + 1, col) == 0) {
-                MazeState m = new MazeState(p1);
-                neighbors.add(m);
-            }
-        }
-        if (inBounds(row, col + 1, maze)) {
-            Position p2 = new Position(row, col + 1);
-            if (maze.getValue(row, col + 1) == 0) {
-                MazeState m = new MazeState(p2);
-                neighbors.add(m);
-            }
-        }
-        if (inBounds(row - 1, col, maze)) {
-            Position p3 = new Position(row - 1, col);
-            if (maze.getValue(row - 1, col) == 0) {
-                MazeState m = new MazeState(p3);
-                neighbors.add(m);
-            }
-        }
-        if (inBounds(row, col - 1, maze)) {
-            Position p4 = new Position(row, col - 1);
-            if (maze.getValue(row, col - 1) == 0) {
-                MazeState m = new MazeState(p4);
-                neighbors.add(m);
-            }
-        }
-        if (inBounds(row + 1, col - 1, maze)) {
-            Position p5 = new Position(row + 1, col - 1);
-            if (maze.getValue(row + 1, col - 1) == 0) {
-                MazeState m = new MazeState(p5);
-                m.crossTome = true;
-                neighbors.add(m);
-            }
-        }
-        if (inBounds(row + 1, col + 1, maze)) {
-            Position p6 = new Position(row + 1, col + 1);
-            if (maze.getValue(row + 1, col + 1) == 0) {
-                MazeState m = new MazeState(p6);
-                m.crossTome = true;
-                neighbors.add(m);
-            }
-        }
-        if (inBounds(row - 1, col + 1, maze)) {
-            Position p7 = new Position(row - 1, col + 1);
-            if (maze.getValue(row - 1, col + 1) == 0) {
-                MazeState m = new MazeState(p7);
-                m.crossTome = true;
-                neighbors.add(m);
-            }
-        }
-        if (inBounds(row - 1, col - 1, maze)) {
-            Position p8 = new Position(row - 1, col);
-            if (maze.getValue(row - 1, col - 1) == 0) {
-                MazeState m = new MazeState(p8);
-                m.crossTome = true;
-                neighbors.add(m);
-            }
-        }
-        return neighbors;
-    }
-
-    public static boolean inBounds(int row, int col, Maze m) {
-        return (0 <= row && row <= m.getGoalPosition().getRowIndex() && 0 <= col && col <= m.getGoalPosition().getColIndex());
-    }
-
-
 }
